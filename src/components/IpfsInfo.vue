@@ -1,9 +1,15 @@
 <template>
   <div class="ipfs-info">
     <img class="ipfs-logo" alt="IPFS logo" src="../assets/logo.svg" />
-    <h1>{{ status }}</h1>
-    <h2>ID: {{ id }}</h2>
-    <h2>Agent version: {{ agentVersion }}</h2>
+    <form v-on:submit.prevent="sendMessage">
+      <div id="messages" class="messages">
+        <p v-for="(m,idx) in messages" :key="idx">{{ m }}</p>
+      </div>
+      <input size="100" v-model="message" placeholder="Write something and press enter."/>
+    </form>
+    <h4>{{ status }}</h4>
+    <h5>ID: {{ id }}</h5>
+    <h5>Agent version: {{ agentVersion }}</h5>
   </div>
 </template>
 
@@ -16,7 +22,9 @@ export default {
     return {
       status: "Connecting to IPFS...",
       id: "",
-      agentVersion: ""
+      agentVersion: "",
+      message: "",
+      messages: [],
     };
   },
   mounted: function() {
@@ -47,16 +55,23 @@ export default {
         // now started to listen to room
         room.on('message', (m) => {
           console.log(m)
-          this.status = m.data
+          this.messages.push(m.data.toString());
+          var elem = document.getElementById('messages');
+          elem.scrollTop = elem.scrollHeight;
         })
 
         window.room = room
-        const {AgentVersion, id} = await ipfs.id()
+        const {agentVersion, id} = await ipfs.id()
         this.id = id
+        this.agentVersion = agentVersion
       } catch (err) {
         // Set error status text.
         this.status = `Error: ${err}`;
       }
+    },
+    sendMessage () {
+      window.room.broadcast(this.message)
+      this.message = ''
     }
   }
 };
@@ -67,4 +82,16 @@ export default {
 .ipfs-logo {
   height: 10rem;
 }
+.messages {
+  display: flex;
+  flex-direction: column;
+  flex-flow: column;
+  align-items: center;
+  overflow-y: scroll;
+  max-height: 300px;
+}
+.messages p {
+  max-width: 300px;
+}
+
 </style>

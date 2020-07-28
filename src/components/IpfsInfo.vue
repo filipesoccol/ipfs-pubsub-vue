@@ -5,7 +5,7 @@
       <div id="messages" class="messages">
         <p v-for="(m,idx) in messages" :key="idx">{{ m }}</p>
       </div>
-      <input size="100" v-model="message" placeholder="Write something and press enter."/>
+      <input size="50" v-model="message" placeholder="Write something and press enter."/>
     </form>
     <h4>{{ status }}</h4>
     <h5>ID: {{ id }}</h5>
